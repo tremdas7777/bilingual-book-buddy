@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ProductHero } from "@/components/store/product-hero";
 import { media } from "@/components/store/product-media";
@@ -17,17 +17,19 @@ import {
 } from "@/components/store/sections";
 import { StickyBuyBar } from "@/components/store/sticky-buy-bar";
 import { TryIt } from "@/components/store/try-it";
+import { trackCheckoutClick } from "@/lib/analytics";
+import { brand } from "@/lib/brand";
 import {
-  checkoutLink,
-  defaultColor,
-  findKit,
-  store,
+  availableBundles,
+  DEFAULT_BUNDLE_ID,
+  DEFAULT_COLOR,
+  getBundle,
+  type BundleId,
   type ColorId,
-  type KitId,
-} from "@/lib/store-config";
-import { metaPixelSnippet, track } from "@/lib/track";
+} from "@/lib/bundles";
+import { metaTrack } from "@/lib/meta-pixel";
 
-const title = `${store.productName} | ${store.brand}`;
+const title = `${brand.productName} | ${brand.name}`;
 const description =
   "Seu filho toca na figura e o livro fala em português e inglês. Mais de 10 temas, sem telas e sem internet. A partir de 3 anos.";
 
@@ -40,7 +42,6 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: description },
       { property: "og:type", content: "product" },
       { property: "og:image", content: media.capa },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
     scripts: [
       {
@@ -48,38 +49,33 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Product",
-          name: store.productName,
+          name: brand.productName,
           description,
-          brand: { "@type": "Brand", name: store.brand },
-          offers: store.kits.map((k) => ({
+          brand: { "@type": "Brand", name: brand.name },
+          offers: availableBundles.map((b) => ({
             "@type": "Offer",
-            name: k.label,
-            price: k.price.toFixed(2),
+            name: b.name,
+            price: b.price.toFixed(2),
             priceCurrency: "BRL",
             availability: "https://schema.org/InStock",
           })),
         }),
       },
-      ...(store.metaPixelId ? [{ children: metaPixelSnippet(store.metaPixelId) }] : []),
     ],
   }),
   component: Store,
 });
 
 function Store() {
-  const [color, setColor] = useState<ColorId>(defaultColor);
-  const [kit, setKit] = useState<KitId>("kit1");
-  const [buyError, setBuyError] = useState("");
+  const navigate = useNavigate();
+  const [color, setColor] = useState<ColorId>(DEFAULT_COLOR);
+  const [bundleId, setBundleId] = useState<BundleId>(DEFAULT_BUNDLE_ID);
   const [showSticky, setShowSticky] = useState(false);
   const ctaRef = useRef<HTMLButtonElement>(null);
-  const selectedKit = findKit(kit);
+  const bundle = getBundle(bundleId);
 
   useEffect(() => {
-    track("ViewContent", {
-      content_name: store.productName,
-      value: selectedKit.price,
-      currency: "BRL",
-    });
+    metaTrack("ViewContent", { value: bundle.price, contentName: bundle.name });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -93,36 +89,30 @@ function Store() {
     return () => observer.disconnect();
   }, []);
 
-  function buy() {
-    const url = checkoutLink(color, kit);
-    if (!url) {
-      setBuyError("Checkout ainda não configurado. Defina os links em src/lib/store-config.ts.");
-      document.getElementById("comprar")?.scrollIntoView({ behavior: "smooth" });
-      return;
-    }
-    setBuyError("");
-    track("InitiateCheckout", {
-      value: selectedKit.price,
-      currency: "BRL",
-      num_items: selectedKit.units,
+  function buy(source: string) {
+    trackCheckoutClick({
+      source,
+      bundleId: bundle.id,
+      bundleName: bundle.name,
+      value: bundle.price,
     });
-    window.location.href = url;
+    navigate({ to: "/checkout", search: { plano: bundle.id, cor: color } });
   }
+
+  const scrollToBuy = () =>
+    document.getElementById("comprar")?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <div className="min-h-screen">
       <AnnouncementBar />
-      <Header
-        onBuy={() => document.getElementById("comprar")?.scrollIntoView({ behavior: "smooth" })}
-      />
+      <Header onBuy={scrollToBuy} />
       <main>
         <ProductHero
           color={color}
-          kit={kit}
+          bundleId={bundleId}
           onColor={setColor}
-          onKit={setKit}
-          onBuy={buy}
-          buyError={buyError}
+          onBundle={setBundleId}
+          onBuy={() => buy("hero")}
           ctaRef={ctaRef}
         />
         <HowItWorks />
@@ -133,10 +123,10 @@ function Store() {
         <Reviews />
         <Specs />
         <Faq />
-        <FinalCta onBuy={buy} />
+        <FinalCta onBuy={() => buy("final_cta")} />
       </main>
       <Footer />
-      <StickyBuyBar visible={showSticky} kit={selectedKit} onBuy={buy} />
+      <StickyBuyBar visible={showSticky} kit={bundle} onBuy={() => buy("sticky_bar")} />
     </div>
   );
 }

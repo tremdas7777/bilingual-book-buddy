@@ -101,3 +101,40 @@
   .story-text-large { font-size: 23px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* Utilitários das páginas de política, contato e rastreio */
+:root {
+  --paper: var(--background);
+  --surface: var(--card);
+  --ink: var(--foreground);
+}
+@layer utilities {
+  .container-edge { width: 100%; max-width: 80rem; margin-inline: auto; padding-inline: 1.5rem; }
+  @media (min-width: 768px) { .container-edge { padding-inline: 2rem; } }
+  .eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+  .text-balance { text-wrap: balance; }
+
+  /* Anti-cópia: bloqueia seleção de texto e arrastar imagens. Campos continuam selecionáveis. */
+  body { -webkit-user-select: none; user-select: none; }
+  input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
+  img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
+  a img, button img, label img { pointer-events: auto; }
+}
+
+/* Checkout e páginas do pedido (botões verdes de Pix) */
+.ck {
+  --primary: oklch(0.53 0.13 155);
+  --primary-foreground: #ffffff;
+  --ck-green: oklch(0.53 0.13 155);
+  --ck-footer: oklch(0.27 0.06 265);
+  --ck-ok: oklch(0.53 0.13 155);
+  --ck-field: oklch(0.97 0.012 85);
+  --ck-blue: oklch(0.27 0.06 265);
+  --ck-pix: #32bcad;
+  --ck-badge: oklch(0.93 0.07 150);
+  --ck-bg: oklch(0.99 0.006 85);
+  background: var(--ck-bg);
+  font-family: var(--font-sans);
+}
+.ck h1, .ck h2, .ck h3 { font-family: inherit; letter-spacing: normal; }
+.ck .ck-surface { background: var(--ck-bg); }

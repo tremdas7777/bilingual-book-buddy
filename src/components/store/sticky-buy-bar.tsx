@@ -1,6 +1,6 @@
 import { media } from "@/components/store/product-media";
 import { money } from "@/lib/format";
-import type { Kit } from "@/lib/store-config";
+import type { Bundle } from "@/lib/bundles";
 import { cn } from "@/lib/utils";
 
 export function StickyBuyBar({
@@ -9,7 +9,7 @@ export function StickyBuyBar({
   onBuy,
 }: {
   visible: boolean;
-  kit: Kit;
+  kit: Bundle;
   onBuy: () => void;
 }) {
   return (
@@ -28,7 +28,9 @@ export function StickyBuyBar({
         />
         <div className="min-w-0 flex-1">
           <p className="hidden truncate text-sm font-bold sm:block">Livro Interativo Bilíngue</p>
-          <p className="text-xs text-muted-foreground line-through">{money(kit.compareAt)}</p>
+          <p className="text-xs text-muted-foreground line-through">
+            {kit.compareAtPrice ? money(kit.compareAtPrice) : ""}
+          </p>
           <p className="font-display text-xl font-black leading-none">{money(kit.price)}</p>
         </div>
         <button

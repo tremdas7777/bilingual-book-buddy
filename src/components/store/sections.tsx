@@ -19,7 +19,13 @@ import {
 } from "@/components/ui/accordion";
 import { media } from "@/components/store/product-media";
 import { money } from "@/lib/format";
-import { findKit, store } from "@/lib/store-config";
+import { Link } from "@tanstack/react-router";
+import { PixIcon } from "@/components/checkout/parts";
+import { brand } from "@/lib/brand";
+import { bundleShippingLabel, COLORS, getBundle } from "@/lib/bundles";
+
+/** Coloque aqui apenas avaliações reais de clientes. A seção só aparece quando houver itens. */
+const REVIEWS: { name: string; city: string; text: string; rating: number }[] = [];
 
 function Eyebrow({ children }: { children: string }) {
   return (
@@ -39,9 +45,9 @@ function Title({ children }: { children: React.ReactNode }) {
 
 export function AnnouncementBar() {
   const items = [
-    store.shipping.freeShipping ? "🚚 Frete grátis para todo o Brasil" : "🚚 Envio com rastreio",
-    `💳 Até ${store.installmentsNoInterest}x sem juros`,
-    `⚡ ${Math.round(store.pixDiscount * 100)}% off no Pix`,
+    `🚚 ${bundleShippingLabel(getBundle("1"))} para todo o Brasil`,
+    "⚡ Pix com aprovação na hora",
+    "📦 Envio em até 1 dia útil",
   ];
   return (
     <div className="bg-foreground text-white">
@@ -67,7 +73,7 @@ export function Header({ onBuy }: { onBuy: () => void }) {
           >
             📖
           </span>
-          {store.brand}
+          {brand.name}
         </a>
         <nav
           className="hidden items-center gap-7 text-sm font-semibold text-muted-foreground md:flex"
@@ -300,14 +306,14 @@ export function Comparison() {
 }
 
 export function Reviews() {
-  if (store.reviews.length === 0) return null;
+  if (REVIEWS.length === 0) return null;
   return (
     <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-[1180px] px-4 sm:px-6">
         <Eyebrow>Avaliações</Eyebrow>
         <Title>O que as famílias dizem</Title>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {store.reviews.map((r) => (
+          {REVIEWS.map((r) => (
             <figure key={r.name + r.text} className="rounded-[20px] border bg-card p-6 shop-shadow">
               <div className="flex gap-0.5 text-sun" aria-label={`${r.rating} de 5 estrelas`}>
                 {Array.from({ length: 5 }, (_, i) => (
@@ -335,7 +341,7 @@ export function Specs() {
     ["Alimentação", "3 pilhas AAA (não inclusas)"],
     ["Dimensões", "Aprox. 25 × 25 × 2 cm"],
     ["Peso", "Aprox. 400 g"],
-    ["Cores", store.colors.map((c) => c.label).join(" ou ")],
+    ["Cores", COLORS.map((c) => c.label).join(" ou ")],
   ];
   return (
     <section className="py-16 sm:py-20">
@@ -402,11 +408,11 @@ export function Faq() {
     ],
     [
       "Quanto tempo demora para chegar?",
-      `${store.shipping.dispatch}. Você recebe o código de rastreio por e-mail assim que o pedido sai, e o prazo exato aparece no checkout de acordo com o seu CEP.`,
+      `Enviamos em até 1 dia útil após o pagamento. Você recebe o código de rastreio por e-mail assim que o pedido sai, e o prazo exato aparece no checkout de acordo com o seu CEP.`,
     ],
     [
       "Quais as formas de pagamento?",
-      `Pix (com ${Math.round(store.pixDiscount * 100)}% de desconto), cartão de crédito em até ${store.maxInstallments}x (${store.installmentsNoInterest}x sem juros) e boleto.`,
+      "Pagamento via Pix, com aprovação na hora. Assim que o Pix é confirmado, o pedido já é separado para envio.",
     ],
     [
       "E se eu não gostar?",
@@ -430,9 +436,9 @@ export function Faq() {
             </AccordionItem>
           ))}
         </Accordion>
-        {store.whatsapp && (
+        {brand.whatsapp.phoneE164 && (
           <a
-            href={`https://wa.me/${store.whatsapp}`}
+            href={`https://wa.me/${brand.whatsapp.phoneE164}`}
             target="_blank"
             rel="noreferrer"
             className="mx-auto mt-8 flex w-fit items-center gap-2 rounded-full border-2 px-5 py-3 font-bold hover:bg-muted"
@@ -446,7 +452,7 @@ export function Faq() {
 }
 
 export function FinalCta({ onBuy }: { onBuy: () => void }) {
-  const kit = findKit("kit1");
+  const kit = getBundle("1");
   return (
     <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-[1180px] px-4 sm:px-6">
@@ -481,31 +487,44 @@ export function FinalCta({ onBuy }: { onBuy: () => void }) {
 }
 
 export function Footer() {
+  const links = [
+    { to: "/rastreio", label: "Rastrear pedido" },
+    { to: "/contato", label: "Contato" },
+    { to: "/politica-envio", label: "Política de envio" },
+    { to: "/politica-reembolso", label: "Trocas e devoluções" },
+    { to: "/politica-privacidade", label: "Privacidade" },
+  ] as const;
   return (
     <footer className="border-t bg-card pb-28 pt-10 text-sm text-muted-foreground lg:pb-10">
-      <div className="mx-auto flex max-w-[1180px] flex-col gap-4 px-4 sm:px-6 md:flex-row md:items-start md:justify-between">
+      <div className="mx-auto grid max-w-[1180px] gap-6 px-4 sm:px-6 md:grid-cols-[1fr_auto_auto] md:gap-12">
         <div>
-          <p className="font-display text-lg font-black text-foreground">{store.brand}</p>
-          {store.legalName && <p>{store.legalName}</p>}
-          {store.cnpj && <p>CNPJ {store.cnpj}</p>}
-          {store.supportEmail && (
+          <p className="font-display text-lg font-black text-foreground">{brand.name}</p>
+          {brand.company.legalName && <p>{brand.company.legalName}</p>}
+          {brand.company.cnpj && <p>CNPJ {brand.company.cnpj}</p>}
+          {brand.email && (
             <p>
-              <a href={`mailto:${store.supportEmail}`} className="hover:text-foreground">
-                {store.supportEmail}
+              <a href={`mailto:${brand.email}`} className="hover:text-foreground">
+                {brand.email}
               </a>
             </p>
           )}
         </div>
-        <div className="flex flex-wrap gap-2 text-xs font-semibold">
-          {["Pix", "Visa", "Mastercard", "Elo", "Boleto"].map((p) => (
-            <span key={p} className="rounded-md border px-2.5 py-1">
-              {p}
-            </span>
+        <nav aria-label="Atendimento" className="grid gap-1.5">
+          {links.map((l) => (
+            <Link key={l.to} to={l.to} className="hover:text-foreground">
+              {l.label}
+            </Link>
           ))}
+        </nav>
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase">Pagamento</p>
+          <span className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold">
+            <PixIcon className="h-3.5 w-3.5" /> Pix
+          </span>
         </div>
       </div>
-      <p className="mx-auto mt-6 max-w-[1180px] px-4 text-xs sm:px-6">
-        © {new Date().getFullYear()} {store.brand}. Imagens ilustrativas.
+      <p className="mx-auto mt-8 max-w-[1180px] px-4 text-xs sm:px-6">
+        © {new Date().getFullYear()} {brand.name}. Imagens ilustrativas.
       </p>
     </footer>
   );

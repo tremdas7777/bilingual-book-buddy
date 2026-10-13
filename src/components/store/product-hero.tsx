@@ -2,7 +2,6 @@ import { useState, type RefObject } from "react";
 import {
   BatteryCharging,
   Check,
-  CreditCard,
   Globe2,
   Hand,
   Lock,
@@ -12,18 +11,26 @@ import {
   Truck,
   Volume2,
 } from "lucide-react";
+import { PixIcon } from "@/components/checkout/parts";
 import { gallery } from "@/components/store/product-media";
-import { discountPercent, installment, money } from "@/lib/format";
-import { findKit, store, type ColorId, type KitId } from "@/lib/store-config";
+import { discountPercent, money } from "@/lib/format";
+import { brand } from "@/lib/brand";
+import {
+  availableBundles,
+  bundleShippingLabel,
+  COLORS,
+  getBundle,
+  type BundleId,
+  type ColorId,
+} from "@/lib/bundles";
 import { cn } from "@/lib/utils";
 
 interface Props {
   color: ColorId;
-  kit: KitId;
+  bundleId: BundleId;
   onColor: (color: ColorId) => void;
-  onKit: (kit: KitId) => void;
+  onBundle: (id: BundleId) => void;
   onBuy: () => void;
-  buyError: string;
   ctaRef: RefObject<HTMLButtonElement | null>;
 }
 
@@ -34,15 +41,15 @@ const highlights = [
   { icon: Hand, text: "Páginas resistentes para mãos pequenas" },
 ];
 
-export function ProductHero({ color, kit, onColor, onKit, onBuy, buyError, ctaRef }: Props) {
+export function ProductHero({ color, bundleId, onColor, onBundle, onBuy, ctaRef }: Props) {
   const [active, setActive] = useState(0);
-  const selectedKit = findKit(kit);
-  const off = discountPercent(selectedKit.price, selectedKit.compareAt);
-  const pix = selectedKit.price * (1 - store.pixDiscount);
+  const bundle = getBundle(bundleId);
+  const compareAt = bundle.compareAtPrice ?? 0;
+  const off = discountPercent(bundle.price, compareAt);
   const image = gallery[active] ?? gallery[0]!;
 
   return (
-    <section id="comprar" className="wave-top">
+    <section id="comprar" className="wave-top scroll-mt-20">
       <div className="mx-auto grid max-w-[1180px] gap-8 px-4 pb-14 pt-6 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pt-10">
         <div className="lg:sticky lg:top-24 lg:self-start">
           <div className="relative aspect-square overflow-hidden rounded-[20px] border bg-card shop-shadow">
@@ -93,7 +100,7 @@ export function ProductHero({ color, kit, onColor, onKit, onBuy, buyError, ctaRe
             </span>
           </div>
           <h1 className="mt-3 font-display text-[30px] font-black leading-[1.1] sm:text-[40px]">
-            {store.productName}
+            {brand.productName}
           </h1>
           <p className="mt-3 text-[17px] leading-relaxed text-muted-foreground">
             Seu filho toca na figura e o livro <strong className="text-foreground">fala</strong> —
@@ -102,27 +109,22 @@ export function ProductHero({ color, kit, onColor, onKit, onBuy, buyError, ctaRe
 
           <div className="mt-5 rounded-2xl border bg-card p-4">
             <div className="flex flex-wrap items-baseline gap-x-3">
-              <span className="text-base text-muted-foreground line-through">
-                {money(selectedKit.compareAt)}
-              </span>
+              {compareAt > bundle.price && (
+                <span className="text-base text-muted-foreground line-through">
+                  {money(compareAt)}
+                </span>
+              )}
               <span className="font-display text-[38px] font-black leading-none text-foreground">
-                {money(selectedKit.price)}
+                {money(bundle.price)}
               </span>
-              {off > 0 && (
+              {compareAt > bundle.price && (
                 <span className="rounded-md bg-mint-soft px-2 py-0.5 text-sm font-bold text-mint">
-                  Economize {money(selectedKit.compareAt - selectedKit.price)}
+                  Economize {money(compareAt - bundle.price)}
                 </span>
               )}
             </div>
-            <p className="mt-2 text-sm">
-              <strong className="text-mint">{money(pix)} no Pix</strong>{" "}
-              <span className="text-muted-foreground">
-                ({Math.round(store.pixDiscount * 100)}% de desconto)
-              </span>
-            </p>
-            <p className="text-sm text-muted-foreground">
-              ou {store.installmentsNoInterest}x de{" "}
-              {installment(selectedKit.price, store.installmentsNoInterest)} sem juros no cartão
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <PixIcon className="h-4 w-4" /> À vista no Pix, com aprovação na hora
             </p>
           </div>
 
@@ -130,11 +132,11 @@ export function ProductHero({ color, kit, onColor, onKit, onBuy, buyError, ctaRe
             <legend className="text-sm font-bold">
               Cor:{" "}
               <span className="font-normal text-muted-foreground">
-                {store.colors.find((c) => c.id === color)?.label}
+                {COLORS.find((c) => c.id === color)?.label}
               </span>
             </legend>
             <div className="mt-2 flex gap-3">
-              {store.colors.map((c) => (
+              {COLORS.map((c) => (
                 <button
                   key={c.id}
                   type="button"
@@ -158,11 +160,11 @@ export function ProductHero({ color, kit, onColor, onKit, onBuy, buyError, ctaRe
           <fieldset className="mt-6">
             <legend className="text-sm font-bold">Escolha seu kit</legend>
             <div className="mt-2 grid gap-3">
-              {store.kits.map((k) => {
-                const selected = k.id === kit;
+              {availableBundles.map((b) => {
+                const selected = b.id === bundleId;
                 return (
                   <label
-                    key={k.id}
+                    key={b.id}
                     className={cn(
                       "relative flex cursor-pointer items-center gap-3 rounded-xl border-2 bg-card p-4 transition",
                       selected
@@ -173,9 +175,9 @@ export function ProductHero({ color, kit, onColor, onKit, onBuy, buyError, ctaRe
                     <input
                       type="radio"
                       name="kit"
-                      value={k.id}
+                      value={b.id}
                       checked={selected}
-                      onChange={() => onKit(k.id)}
+                      onChange={() => onBundle(b.id)}
                       className="sr-only"
                     />
                     <span
@@ -188,28 +190,28 @@ export function ProductHero({ color, kit, onColor, onKit, onBuy, buyError, ctaRe
                     </span>
                     <span className="flex-1">
                       <span className="block font-display text-[17px] font-extrabold">
-                        {k.label}
+                        {b.name}
                       </span>
-                      {k.note && (
-                        <span className="block text-xs text-muted-foreground">{k.note}</span>
-                      )}
-                      {k.units > 1 && (
+                      <span className="block text-xs text-muted-foreground">{b.priceNote}</span>
+                      {b.units > 1 && (
                         <span className="block text-xs font-semibold text-mint">
-                          {money(k.price / k.units)} cada
+                          {money(b.price / b.units)} cada
                         </span>
                       )}
                     </span>
                     <span className="text-right">
                       <span className="block font-display text-lg font-black">
-                        {money(k.price)}
+                        {money(b.price)}
                       </span>
-                      <span className="block text-xs text-muted-foreground line-through">
-                        {money(k.compareAt)}
-                      </span>
+                      {b.compareAtPrice && b.compareAtPrice > b.price && (
+                        <span className="block text-xs text-muted-foreground line-through">
+                          {money(b.compareAtPrice)}
+                        </span>
+                      )}
                     </span>
-                    {k.badge && (
+                    {b.badge && (
                       <span className="absolute -top-2.5 right-3 rounded-full bg-sun px-2.5 py-0.5 text-[11px] font-black uppercase text-foreground">
-                        {k.badge}
+                        {b.badge}
                       </span>
                     )}
                   </label>
@@ -226,34 +228,25 @@ export function ProductHero({ color, kit, onColor, onKit, onBuy, buyError, ctaRe
           >
             Comprar agora
           </button>
-          {buyError && (
-            <p role="alert" className="mt-2 text-center text-sm font-semibold text-destructive">
-              {buyError}
-            </p>
-          )}
           <div className="mt-3 flex items-center justify-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Lock className="size-3.5" /> Compra segura
             </span>
             <span className="flex items-center gap-1">
-              <CreditCard className="size-3.5" /> Pix, cartão e boleto
+              <PixIcon className="size-3.5" /> Pagamento via Pix
             </span>
           </div>
 
           <ul className="mt-6 grid gap-2.5 rounded-2xl border bg-card p-4 text-sm">
-            {store.shipping.freeShipping && (
-              <li className="flex items-center gap-3">
-                <Truck className="size-5 text-primary" />
-                <span>
-                  <strong>Frete grátis</strong> para todo o Brasil
-                </span>
-              </li>
-            )}
+            <li className="flex items-center gap-3">
+              <Truck className="size-5 text-primary" />
+              <span>
+                <strong>{bundleShippingLabel(bundle)}</strong> para todo o Brasil
+              </span>
+            </li>
             <li className="flex items-center gap-3">
               <ShieldCheck className="size-5 text-primary" />
-              <span>
-                {store.shipping.dispatch} · {store.shipping.delivery}
-              </span>
+              <span>Enviado em até 1 dia útil após o pagamento, com rastreio</span>
             </li>
             <li className="flex items-center gap-3">
               <RotateCcw className="size-5 text-primary" />
