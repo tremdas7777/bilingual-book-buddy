@@ -1,4 +1,4 @@
-import { useState, type RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import {
   BatteryCharging,
   Check,
@@ -12,7 +12,7 @@ import {
   Volume2,
 } from "lucide-react";
 import { PixIcon } from "@/components/checkout/parts";
-import { gallery } from "@/components/store/product-media";
+import { galleryFor } from "@/components/store/product-media";
 import { discountPercent, money } from "@/lib/format";
 import { brand } from "@/lib/brand";
 import {
@@ -46,7 +46,10 @@ export function ProductHero({ color, bundleId, onColor, onBundle, onBuy, ctaRef 
   const bundle = getBundle(bundleId);
   const compareAt = bundle.compareAtPrice ?? 0;
   const off = discountPercent(bundle.price, compareAt);
+  const gallery = galleryFor(color);
   const image = gallery[active] ?? gallery[0]!;
+  // Trocou a cor: mostra a capa dessa cor.
+  useEffect(() => setActive(0), [color]);
 
   return (
     <section id="comprar" className="wave-top scroll-mt-20">
@@ -54,17 +57,14 @@ export function ProductHero({ color, bundleId, onColor, onBundle, onBuy, ctaRef 
         <div className="lg:sticky lg:top-24 lg:self-start">
           <div className="relative aspect-square overflow-hidden rounded-[20px] border bg-card shop-shadow">
             {off > 0 && (
-              <span className="absolute left-4 top-4 z-10 rounded-full bg-cta px-3 py-1 font-display text-sm font-black text-white">
+              <span className="absolute right-4 top-4 z-10 rounded-full bg-cta px-3 py-1 font-display text-sm font-black text-white">
                 -{off}%
               </span>
             )}
             <img
               src={image.src}
               alt={image.alt}
-              className={cn(
-                "h-full w-full",
-                image.fit === "cover" ? "object-cover" : "object-contain p-4",
-              )}
+              className="h-full w-full object-cover"
               fetchPriority={active === 0 ? "high" : "auto"}
             />
           </div>

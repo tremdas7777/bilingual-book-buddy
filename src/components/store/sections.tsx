@@ -106,7 +106,7 @@ export function HowItWorks() {
       n: 1,
       title: "Escolha o idioma",
       text: "Um botão alterna entre português e inglês.",
-      img: media.capa,
+      img: media.capaAzul,
     },
     {
       n: 2,
@@ -118,7 +118,7 @@ export function HowItWorks() {
       n: 3,
       title: "Ouça e repita",
       text: "O livro fala a palavra com pronúncia clara.",
-      img: media.idiomas,
+      img: media.crianca,
     },
   ];
   return (
@@ -132,13 +132,8 @@ export function HowItWorks() {
               key={s.n}
               className="overflow-hidden rounded-[20px] border bg-card shop-shadow"
             >
-              <div className="aspect-[4/3] bg-white">
-                <img
-                  src={s.img}
-                  alt=""
-                  className="h-full w-full object-contain p-3"
-                  loading="lazy"
-                />
+              <div className="aspect-square bg-white">
+                <img src={s.img} alt="" className="h-full w-full object-cover" loading="lazy" />
               </div>
               <div className="p-5">
                 <span className="grid size-8 place-items-center rounded-full bg-cta font-display font-black text-white">
@@ -186,7 +181,7 @@ export function Benefits() {
       <div className="mx-auto grid max-w-[1180px] items-center gap-10 px-4 sm:px-6 lg:grid-cols-2">
         <img
           src={media.familia}
-          alt="Crianças brincando juntas com o livro interativo"
+          alt="Duas crianças brincando juntas com os livros azul e rosa"
           className="aspect-square w-full rounded-[20px] object-cover shop-shadow"
           loading="lazy"
         />
@@ -252,9 +247,9 @@ export function Themes() {
           ))}
         </div>
         <img
-          src={media.temas}
-          alt="Exemplos de páginas: frutas, veículos, corpo humano e profissões"
-          className="mx-auto mt-10 w-full max-w-2xl rounded-[20px] border bg-white shop-shadow"
+          src={media.paginas}
+          alt="Livro aberto nas páginas de frutas e veículos, com o nome de cada figura"
+          className="mx-auto mt-10 aspect-square w-full max-w-2xl rounded-[20px] object-cover shop-shadow"
           loading="lazy"
         />
       </div>
@@ -475,9 +470,9 @@ export function FinalCta({ onBuy }: { onBuy: () => void }) {
             </button>
           </div>
           <img
-            src={media.capa}
+            src={media.capaAzul}
             alt=""
-            className="mx-auto w-full max-w-[340px] rounded-[20px] bg-white p-4"
+            className="mx-auto aspect-square w-full max-w-[340px] rounded-[20px] object-cover"
             loading="lazy"
           />
         </div>

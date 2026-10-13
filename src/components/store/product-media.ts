@@ -1,41 +1,29 @@
-import capa from "@/assets/produto/capa.jpg";
-import familia from "@/assets/produto/familia.jpg";
-import comoFunciona from "@/assets/produto/como-funciona.jpg";
-import toque from "@/assets/produto/toque.jpg";
-import temas from "@/assets/produto/temas.jpg";
-import idiomas from "@/assets/produto/idiomas.jpg";
+import capaAzul from "@/assets/produto/capa-azul.webp";
+import capaRosa from "@/assets/produto/capa-rosa.webp";
+import crianca from "@/assets/produto/crianca.webp";
+import toque from "@/assets/produto/toque.webp";
+import paginas from "@/assets/produto/paginas.webp";
+import familia from "@/assets/produto/familia.webp";
+import type { ColorId } from "@/lib/bundles";
 
-export const media = { capa, familia, comoFunciona, toque, temas, idiomas };
+export const media = { capaAzul, capaRosa, crianca, toque, paginas, familia };
 
-export const gallery = [
-  {
-    src: capa,
-    alt: "Livro interativo bilíngue com capa colorida e alça para carregar",
-    fit: "contain" as const,
-  },
-  {
-    src: familia,
-    alt: "Duas crianças brincando com o livro interativo em uma mesa",
-    fit: "cover" as const,
-  },
-  {
-    src: comoFunciona,
-    alt: "Infográfico: toque e escute, mais de 10 temas e dois idiomas",
-    fit: "contain" as const,
-  },
-  {
-    src: toque,
-    alt: "Dedo de criança tocando a figura de um gato no livro",
-    fit: "contain" as const,
-  },
-  {
-    src: temas,
-    alt: "Páginas com temas de frutas, veículos, corpo humano e profissões",
-    fit: "contain" as const,
-  },
-  {
-    src: idiomas,
-    alt: "Figuras de bicicleta e cachorro com nomes em português e inglês",
-    fit: "contain" as const,
-  },
-];
+/** Capa de cada cor (a galeria troca a primeira foto quando o cliente escolhe a cor). */
+export const coverByColor: Record<ColorId, string> = { azul: capaAzul, rosa: capaRosa };
+
+export type GalleryImage = { src: string; alt: string };
+
+export function galleryFor(color: ColorId): GalleryImage[] {
+  const other: ColorId = color === "azul" ? "rosa" : "azul";
+  return [
+    {
+      src: coverByColor[color],
+      alt: `Livro interativo bilíngue na cor ${color}, com alça para carregar`,
+    },
+    { src: crianca, alt: "Criança tocando uma figura do livro e ouvindo a palavra" },
+    { src: toque, alt: "Dedo tocando a figura do gato na página do livro" },
+    { src: paginas, alt: "Livro aberto nas páginas de frutas e veículos" },
+    { src: familia, alt: "Duas crianças brincando juntas com os livros azul e rosa" },
+    { src: coverByColor[other], alt: `Livro interativo bilíngue na cor ${other}` },
+  ];
+}

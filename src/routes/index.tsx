@@ -41,7 +41,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "product" },
-      { property: "og:image", content: media.capa },
+      { property: "og:image", content: media.capaAzul },
     ],
     scripts: [
       {

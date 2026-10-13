@@ -22,9 +22,9 @@ export function StickyBuyBar({
     >
       <div className="mx-auto flex max-w-[1180px] items-center gap-3 px-4 py-3 sm:px-6">
         <img
-          src={media.capa}
+          src={media.capaAzul}
           alt=""
-          className="hidden size-12 rounded-lg border bg-white object-contain sm:block"
+          className="hidden size-12 rounded-lg border object-cover sm:block"
         />
         <div className="min-w-0 flex-1">
           <p className="hidden truncate text-sm font-bold sm:block">Livro Interativo Bilíngue</p>
