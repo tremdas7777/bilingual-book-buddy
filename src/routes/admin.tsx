@@ -159,11 +159,17 @@ function AdminPage() {
       if (r.ok) {
         sessionStorage.setItem(STORAGE_KEY, password);
         setAuthed(true);
+      } else if ("error" in r && r.error) {
+        setError(
+          "O servidor ainda não tem a senha do painel. Cadastre o secret ADMIN_PASSWORD no Lovable (Cloud → Secrets) e publique de novo.",
+        );
       } else {
         setError("Senha incorreta");
       }
-    } catch {
-      setError("Erro ao verificar senha");
+    } catch (err) {
+      setError(
+        `Erro ao verificar senha: ${err instanceof Error ? err.message : "servidor indisponível"}. Confira se o site foi publicado depois de ativar o Cloud.`,
+      );
     }
   };
 
