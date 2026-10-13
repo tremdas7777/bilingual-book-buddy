@@ -1,0 +1,7 @@
+import { Bird, Flower2, Leaf, Sprout, Volume2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+export interface VocabularyProps { onSpeak: (text: string, language: string) => void; }
+const words = [{ pt: 'Semente', en: 'Seed', Icon: Sprout }, { pt: 'Pássaro', en: 'Bird', Icon: Bird }, { pt: 'Floresta', en: 'Forest', Icon: Leaf }, { pt: 'Flor', en: 'Flower', Icon: Flower2 }];
+export function Vocabulary({ onSpeak }: VocabularyProps) {
+ return <section id="palavrinhas" className="mx-auto mt-12 max-w-[1040px] border-t border-border pt-7 pb-10"><div className="mb-6 flex items-center justify-between"><h2 className="flex items-center gap-2 text-lg font-extrabold"><Sprout className="size-5 text-primary" /> Pequenas palavras, grandes descobertas</h2><span className="hidden text-xs text-muted-foreground sm:block">Palavrinhas desta história</span></div><div className="grid grid-cols-2 gap-6 md:grid-cols-4">{words.map(({ pt, en, Icon }) => <div key={en} className="flex items-center gap-3"><span className="word-icon"><Icon className="size-22 size-5" /></span><div><p className="text-sm font-semibold">{pt}</p><p className="mt-0.5 text-xs text-muted-foreground">{en}</p></div><Button variant="ghost" size="icon" className="ml-auto h-8 w-8 text-muted-foreground" aria-label={`Ouvir ${en}`} title={`Ouvir ${en}`} onClick={() => onSpeak(en, 'en-US')}><Volume2 className="size-3.5" /></Button></div>)}</div></section>;
+}
