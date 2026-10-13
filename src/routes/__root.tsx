@@ -78,11 +78,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Era uma vez — Histórias bilíngues" },
-      { name: "description", content: "Histórias ilustradas em português e inglês para pequenos leitores." },
-      { name: "author", content: "Era uma vez" },
-      { property: "og:title", content: "Era uma vez — Histórias bilíngues" },
-      { property: "og:description", content: "Histórias ilustradas em português e inglês para pequenos leitores." },
+      { title: "Pequeno Bilíngue — Livro interativo com som" },
+      { name: "description", content: "Livro interativo bilíngue com som: português e inglês na ponta do dedo." },
+      { name: "author", content: "Pequeno Bilíngue" },
+      { property: "og:title", content: "Pequeno Bilíngue — Livro interativo com som" },
+      { property: "og:description", content: "Livro interativo bilíngue com som: português e inglês na ponta do dedo." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
 
